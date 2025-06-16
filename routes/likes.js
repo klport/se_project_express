@@ -1,7 +1,7 @@
 const router = require("express").Router();
-const { createLikeLike, deleteLike } = require("../controllers/likes");
+const { likeItem, dislikeItem } = require("../controllers/likes");
 
-router.post("/items/:itemId/likes", createLike);
-router.delete("/items/:itemId/likes", deleteLike);
+router.post("/items/:itemId/likes", likeItem); // like
+router.delete("/items/:itemId/likes", dislikeItem); // delete
 
 module.exports = router;

@@ -15,7 +15,10 @@ const createItem = (req, res) => {
       res.send({ data: item });
     })
     .catch((e) => {
-      res.status(500).send({ message: "Error from createItem", e });
+      res.status(errors.INTERNAL_SERVER_ERROR).send({
+        message: "Error from createItem",
+        e,
+      });
     });
 };
 
@@ -23,7 +26,9 @@ const getItems = (req, res) => {
   ClothingItem.find({})
     .then((items) => res.status(200).send(items))
     .catch((e) => {
-      res.status(500).send({ message: "Error from getItems", e });
+      res
+        .status(errors.INTERNAL_SERVER_ERROR)
+        .send({ message: "Error from getItems", e });
     });
 };
 
@@ -35,7 +40,9 @@ const updateItem = (req, res) => {
     .orFail()
     .then((item) => res.status(200).send({ data: item }))
     .catch((e) => {
-      res.status(500).send({ message: "Error from updateItem", e });
+      res
+        .status(errors.INTERNAL_SERVER_ERROR)
+        .send({ message: "Error from updateItem", e });
     });
 };
 
@@ -45,7 +52,9 @@ const deleteItem = (req, res) => {
     .orFail()
     .then((item) => res.status(204).send({}))
     .catch((e) => {
-      res.status(500).send({ message: "Erro from deleteItem", e });
+      res
+        .status(errors.INTERNAL_SERVER_ERROR)
+        .send({ message: "Error from deleteItem", e });
     });
 };
 module.exports = { createItem, getItems, updateItem, deleteItem };
