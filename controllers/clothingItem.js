@@ -52,7 +52,7 @@ const deleteItem = (req, res) => {
   const { itemId } = req.params;
   ClothingItem.findByIdAndDelete(itemId)
     .orFail()
-    .then((item) => res.status(204).send({}))
+    .then((_item) => res.status(204).send({}))
     .catch((err) => {
       res
         .status(errors.INTERNAL_SERVER_ERROR)
