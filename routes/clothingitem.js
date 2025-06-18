@@ -5,26 +5,24 @@ const {
   getItems,
   updateItem,
   deleteItem,
+  likeItem,
+  dislikeItem,
 } = require("../controllers/clothingItem");
 
-// CRUD //
+// add likeItem, dislikeItem
 
-// CREATE
-router.post("/", createItem);
+// starts with /items
 
-// READ
+router.post("/", createItem); // /items/
+
 router.get("/", getItems);
 
-// UPDATE
+router.put("/:itemId", updateItem); // /items/:itemId
 
-router.put("/:itemId", updateItem);
-
-// DELETE
+router.put("/:itemId/like", likeItem);
 
 router.delete("/:itemId", deleteItem);
 
-// GET /items — returns all clothing items
-// POST /items — creates a new item
-// DELETE /items/:itemId — deletes an item by _id
+router.delete("/:itemId/dislike", dislikeItem);
 
 module.exports = router;

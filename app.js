@@ -14,8 +14,6 @@ mongoose
   })
   .catch(console.error);
 
-app.use("/", mainRouter);
-
 app.use((req, res, next) => {
   req.user = {
     _id: "684db2fb8d227da99946b951", // paste the _id of the test user created in the previous step
@@ -23,10 +21,13 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use("/", mainRouter);
+
+app.use((err, req, res, _next) => {
+  console.error("Global error handler caught:", err.message);
+  res.status(500).json({ message: "Internal Server Error" });
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
-// app.get("/", (req, res) => {
-// res.send("Hello World");
-// });
