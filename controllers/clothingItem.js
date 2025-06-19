@@ -1,3 +1,4 @@
+const { default: mongoose } = require("mongoose");
 const ClothingItem = require("../models/clothingItem");
 const errors = require("../utils/errors");
 
@@ -85,7 +86,13 @@ const deleteItem = (req, res) => {
 // like & dislike items
 
 const likeItem = (req, res) => {
-  ClothingItem.findByIdAndUpdate(
+  const { itemId } = req.params;
+  if (!mongoose.isValidObjectId(itemId)) {
+    return res
+      .status(errors.BAD_REQUEST)
+      .send({ message: "Invalid item ID format" });
+  }
+  return ClothingItem.findByIdAndUpdate(
     req.params.itemId,
     { $addToSet: { likes: req.user._id } }, // adds _id to the array if it's not there yet
     { new: true }
@@ -105,9 +112,15 @@ const likeItem = (req, res) => {
 };
 
 const dislikeItem = (req, res) => {
-  ClothingItem.findByIdAndUpdate(
-    req.params.itemId,
-    { $pull: { likes: req.user._id } }, // removes _id from the array
+  const { itemId } = req.params;
+  if (!mongoose.isValidObjectId(itemId)) {
+    return res
+      .status(errors.BAD_REQUEST)
+      .send({ message: "Invalid item ID format" });
+  }
+  return ClothingItem.findByIdAndUpdate(
+    itemId,
+    { $pull: { likes: req.user._id } },
     { new: true }
   )
     .orFail(() => {
@@ -117,15 +130,12 @@ const dislikeItem = (req, res) => {
     })
     .then((item) => res.status(200).send(item))
     .catch((err) => {
-      if (err.name === "CastError") {
-        return res
-          .status(errors.BAD_REQUEST)
-          .send({ message: "Invalid item ID format" });
+      if (err.statusCode === errors.NOT_FOUND) {
+        return res.status(errors.NOT_FOUND).send({ message: err.message });
       }
-      res.status(err.statusCode || errors.NOT_FOUND).send({
-        message: err.message || "An error occurred while disliking the item",
-        err,
-      });
+      return res
+        .status(errors.INTERNAL_SERVER_ERROR)
+        .send({ message: "An error occurred while disliking the item", err });
     });
 };
 
