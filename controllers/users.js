@@ -10,7 +10,7 @@ const getUsers = (req, res) => {
     .then((users) => res.send(users))
     .catch((err) => {
       // console.log(err);
-      res.status(INTERNAL_SERVER_ERROR).send({
+      res.status(BAD_REQUEST).send({
         message: "An error occured while finding the user",
         err,
       });
@@ -43,6 +43,11 @@ const getUser = (req, res) => {
       // console.error(err);
       if (err.name === "ValidationError") {
         return res.status(BAD_REQUEST).send({ message: err.message });
+      }
+      if (err.name === "CastError") {
+        return res
+          .status(BAD_REQUEST)
+          .send({ message: "Invalid user ID format" });
       }
       if (err.name === "DocumentNotFoundError") {
         return res.status(NOT_FOUND).send({ message: "User not found" });

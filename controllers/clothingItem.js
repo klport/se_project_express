@@ -15,7 +15,10 @@ const createItem = (req, res) => {
       res.send({ data: item });
     })
     .catch((err) => {
-      res.status(errors.INTERNAL_SERVER_ERROR).send({
+      if (err.name === "ValidationError") {
+        return res.status(errors.BAD_REQUEST).send({ message: err.message });
+      }
+      return res.status(errors.INTERNAL_SERVER_ERROR).send({
         message: "Error from createItem",
         err,
       });
@@ -50,13 +53,32 @@ const updateItem = (req, res) => {
 
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
+
   ClothingItem.findByIdAndDelete(itemId)
-    .orFail()
-    .then((_item) => res.status(204).send({}))
+    .orFail(() => {
+      const error = new Error("Item not found");
+      error.statusCode = errors.NOT_FOUND;
+      throw error;
+    })
+    .then(() => res.status(200).send({}))
     .catch((err) => {
-      res
+      // Handle invalid ID format
+      if (err.name === "CastError") {
+        return res.status(errors.BAD_REQUEST).send({
+          message: "Invalid item ID format",
+        });
+      }
+
+      // Handle if item not found
+      if (err.statusCode === errors.NOT_FOUND) {
+        return res.status(errors.NOT_FOUND).send({ message: err.message });
+      }
+
+      // All other errors
+      console.error("DeleteItem Error:", err);
+      return res
         .status(errors.INTERNAL_SERVER_ERROR)
-        .send({ message: "Error from deleteItem", err });
+        .send({ message: "Internal Server Error" });
     });
 };
 
@@ -95,10 +117,15 @@ const dislikeItem = (req, res) => {
     })
     .then((item) => res.status(200).send(item))
     .catch((err) => {
-      console.error(err);
-      res
-        .status(errors.NOT_FOUND)
-        .send({ message: "An error occured while disliking the item", err });
+      if (err.name === "CastError") {
+        return res
+          .status(errors.BAD_REQUEST)
+          .send({ message: "Invalid item ID format" });
+      }
+      res.status(err.statusCode || errors.NOT_FOUND).send({
+        message: err.message || "An error occurred while disliking the item",
+        err,
+      });
     });
 };
 
