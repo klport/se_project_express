@@ -17,7 +17,7 @@ const createItem = (req, res) => {
     })
     .catch((err) => {
       if (err.name === "ValidationError") {
-        return res.status(errors.BAD_REQUEST).send({ message: err.message });
+        return res.status(errors.BAD_REQUEST).send({ message: "Invalid data" });
       }
       return res.status(errors.INTERNAL_SERVER_ERROR).send({
         message: "Error from createItem",
@@ -29,28 +29,14 @@ const createItem = (req, res) => {
 const getItems = (req, res) => {
   ClothingItem.find({})
     .then((items) => res.status(200).send(items))
-    .catch((err) => {
+    .catch(() => {
       res
         .status(errors.INTERNAL_SERVER_ERROR)
-        .send({ message: "Error from getItems", err });
+        .send({ message: "Error from getItems" });
     });
 };
 
 // POST
-
-const updateItem = (req, res) => {
-  const { itemId } = req.params;
-  const { imageUrl } = req.body;
-
-  ClothingItem.findByIdAndUpdate(itemId, { $set: { imageUrl } })
-    .orFail()
-    .then((item) => res.status(200).send({ data: item }))
-    .catch((err) => {
-      res
-        .status(errors.INTERNAL_SERVER_ERROR)
-        .send({ message: "Error from updateItem", err });
-    });
-};
 
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
@@ -61,7 +47,7 @@ const deleteItem = (req, res) => {
       error.statusCode = errors.NOT_FOUND;
       throw error;
     })
-    .then(() => res.status(200).send({}))
+    .then(() => res.status(200).send({ message: "Item deleted" }))
     .catch((err) => {
       // Handle invalid ID format
       if (err.name === "CastError") {
@@ -72,7 +58,7 @@ const deleteItem = (req, res) => {
 
       // Handle if item not found
       if (err.statusCode === errors.NOT_FOUND) {
-        return res.status(errors.NOT_FOUND).send({ message: err.message });
+        return res.status(errors.NOT_FOUND).send({ message: "Item not found" });
       }
 
       // All other errors
@@ -85,6 +71,7 @@ const deleteItem = (req, res) => {
 
 // like & dislike items
 
+// LIKE ITEM
 const likeItem = (req, res) => {
   const { itemId } = req.params;
   if (!mongoose.isValidObjectId(itemId)) {
@@ -93,7 +80,7 @@ const likeItem = (req, res) => {
       .send({ message: "Invalid item ID format" });
   }
   return ClothingItem.findByIdAndUpdate(
-    req.params.itemId,
+    itemId,
     { $addToSet: { likes: req.user._id } }, // adds _id to the array if it's not there yet
     { new: true }
   )
@@ -104,12 +91,17 @@ const likeItem = (req, res) => {
     })
     .then((item) => res.status(200).send(item))
     .catch((err) => {
-      console.error(err);
-      res
-        .status(errors.NOT_FOUND)
-        .send({ message: "An error occured while liking the item", err });
+      if (err.statusCode === errors.NOT_FOUND) {
+        return res.status(errors.NOT_FOUND).send({ message: "Item not found" });
+      }
+
+      return res
+        .status(errors.INTERNAL_SERVER_ERROR)
+        .send({ message: "An error occured while liking the item" });
     });
 };
+
+// DISLIKE ITEM
 
 const dislikeItem = (req, res) => {
   const { itemId } = req.params;
@@ -131,18 +123,17 @@ const dislikeItem = (req, res) => {
     .then((item) => res.status(200).send(item))
     .catch((err) => {
       if (err.statusCode === errors.NOT_FOUND) {
-        return res.status(errors.NOT_FOUND).send({ message: err.message });
+        return res.status(errors.NOT_FOUND).send({ message: "Item not found" });
       }
       return res
         .status(errors.INTERNAL_SERVER_ERROR)
-        .send({ message: "An error occurred while disliking the item", err });
+        .send({ message: "An error occurred while disliking the item" });
     });
 };
 
 module.exports = {
   createItem,
   getItems,
-  updateItem,
   deleteItem,
   likeItem,
   dislikeItem,

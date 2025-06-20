@@ -3,7 +3,6 @@ const router = require("express").Router();
 const {
   createItem,
   getItems,
-  updateItem,
   deleteItem,
   likeItem,
   dislikeItem,
@@ -16,8 +15,6 @@ const {
 router.post("/", createItem); // /items/
 
 router.get("/", getItems);
-
-router.put("/:itemId", updateItem); // /items/:itemId
 
 router.put("/:itemId/likes", likeItem);
 
