@@ -21,7 +21,6 @@ const createItem = (req, res) => {
       }
       return res.status(errors.INTERNAL_SERVER_ERROR).send({
         message: "Error from createItem",
-        err,
       });
     });
 };

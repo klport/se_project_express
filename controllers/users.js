@@ -42,7 +42,7 @@ const getUser = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
-        return res.status(BAD_REQUEST).send({ message: err.message });
+        return res.status(BAD_REQUEST).send({ message: "Invalid data" });
       }
       if (err.name === "CastError") {
         return res
