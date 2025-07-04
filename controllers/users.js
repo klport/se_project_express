@@ -1,9 +1,14 @@
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const User = require("../models/user");
+
 const {
   BAD_REQUEST,
   INTERNAL_SERVER_ERROR,
   NOT_FOUND,
 } = require("../utils/errors");
+
+// GET
 
 const getUsers = (req, res) => {
   User.find({})
@@ -19,9 +24,13 @@ const getUsers = (req, res) => {
 // POST /users
 
 const createUser = (req, res) => {
-  const { name, avatar } = req.body;
+  const { name, avatar, email, password } = req.body;
 
-  User.create({ name, avatar })
+  // need to hash the pw before creating user
+  bcrypt
+    .hash(password, 10)
+    .then((hash) => User.create({ name, avatar, email, password: hash }))
+    // i need a 409 conflict error - catch?
     .then((user) => res.status(201).send(user))
     .catch((err) => {
       console.error(err);
@@ -34,6 +43,30 @@ const createUser = (req, res) => {
     });
 };
 
+// POST /users  - login
+// receives the email and password
+// check that the email provided corrsponds to an existsing user in the datsbase
+// check that the password is correct (ie: that it matches the password stored in the database)
+// create a jsonwebtoken (and embed the user's id into it)
+// send that token back to the client
+
+const userLogin = (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) {
+    return res.status(BAD_REQUEST).send({ message: "Invalid data" });
+  }
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, "super-strong-secret", {
+        expiresIn: "7d",
+      });
+      res.send({ token });
+    })
+    .catch((_err) => {
+      res.status(401).send({ message: "Invalid User data" });
+    });
+};
+``;
 const getUser = (req, res) => {
   const { userId } = req.params;
   User.findById(userId)
@@ -58,4 +91,4 @@ const getUser = (req, res) => {
     });
 };
 
-module.exports = { getUsers, createUser, getUser };
+module.exports = { getUsers, createUser, getUser, userLogin };
