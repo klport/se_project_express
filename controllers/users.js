@@ -81,8 +81,8 @@ const userLogin = (req, res) => {
 };
 
 const getCurrentUser = (req, res) => {
-  const { userId } = req.user;
-  User.findById(userId)
+  const { _id } = req.user;
+  User.findById(_id)
     .orFail()
     .then((user) => res.status(200).send(user))
     .catch((err) => {
@@ -104,4 +104,39 @@ const getCurrentUser = (req, res) => {
     });
 };
 
-module.exports = { getUsers, createUser, getCurrentUser, userLogin };
+const updateUserProfile = (req, res) => {
+  const { name, avatar } = req.body;
+
+  // Only allow updating name and avatar
+  return User.findByIdAndUpdate(
+    req.user._id,
+    { name, avatar },
+    {
+      new: true, // Return the updated document
+      runValidators: true, // Ensure validators in schema are applied
+    }
+  )
+    .then((user) => {
+      if (!user) {
+        return res.status(NOT_FOUND).send({ message: "User not found" });
+      }
+      return res.send(user);
+    })
+    .catch((err) => {
+      console.error(err);
+      if (err.name === "ValidationError") {
+        return res.status(BAD_REQUEST).send({ message: "Invalid data" });
+      }
+      return res
+        .status(INTERNAL_SERVER_ERROR)
+        .send({ message: "Server error" });
+    });
+};
+
+module.exports = {
+  getUsers,
+  createUser,
+  getCurrentUser,
+  userLogin,
+  updateUserProfile,
+};
