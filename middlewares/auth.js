@@ -23,7 +23,7 @@ const auth = (req, res, next) => {
   }
   // step 6: add user info to request and continue
   req.user = payload;
-  next();
+  return next();
 };
 
 module.exports = auth;

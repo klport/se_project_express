@@ -1,17 +1,17 @@
 const router = require("express").Router();
 const userRouter = require("./users");
 const itemRouter = require("./clothingitem");
-const errors = require("../utils/errors");
+const { userLogin, createUser } = require("../controllers/users");
+const auth = require("../middlewares/auth");
 
-router.use("/users", userRouter);
 router.use("/items", itemRouter);
+router.post("/signin", userLogin);
+router.post("/signup", createUser);
 
-// STEP 4 - PROJECT 13
-app.post("/signin", login);
-app.post("/signup", createUser);
-
-router.use((req, res) => {
-  res.status(errors.NOT_FOUND).send({ message: "Router not found" });
-});
+router.use(auth);
+router.use("/users", userRouter);
+// router.use((req, res) => {
+//  res.status(errors.NOT_FOUND).send({ message: "Router not found" });
+// });
 
 module.exports = router;

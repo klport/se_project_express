@@ -7,6 +7,7 @@ const {
   INTERNAL_SERVER_ERROR,
   NOT_FOUND,
 } = require("../utils/errors");
+const { JWT_SECRET } = require("../utils/config");
 
 // GET
 
@@ -25,17 +26,28 @@ const getUsers = (req, res) => {
 
 const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
-
   // need to hash the pw before creating user
   bcrypt
     .hash(password, 10)
     .then((hash) => User.create({ name, avatar, email, password: hash }))
     // i need a 409 conflict error - catch?
-    .then((user) => res.status(201).send(user))
+    .then((user) => {
+      const userResponse = {
+        _id: user._id,
+        name: user.name,
+        avatar: user.avatar,
+        email: user.email,
+      };
+
+      res.status(201).send(userResponse);
+    })
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
         return res.status(BAD_REQUEST).send({ message: "Invalid data" });
+      }
+      if (err.code === 11000) {
+        return res.status(409).send({ message: "Email already in use" });
       }
       return res
         .status(INTERNAL_SERVER_ERROR)
@@ -57,18 +69,19 @@ const userLogin = (req, res) => {
   }
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, "super-strong-secret", {
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
         expiresIn: "7d",
       });
       res.send({ token });
     })
-    .catch((_err) => {
-      res.status(401).send({ message: "Invalid User data" });
+    .catch((err) => {
+      console.error(err);
+      return res.status(401).send({ message: "Invalid User data" });
     });
 };
-``;
-const getUser = (req, res) => {
-  const { userId } = req.params;
+
+const getCurrentUser = (req, res) => {
+  const { userId } = req.user;
   User.findById(userId)
     .orFail()
     .then((user) => res.status(200).send(user))
@@ -91,4 +104,4 @@ const getUser = (req, res) => {
     });
 };
 
-module.exports = { getUsers, createUser, getUser, userLogin };
+module.exports = { getUsers, createUser, getCurrentUser, userLogin };

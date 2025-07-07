@@ -14,13 +14,6 @@ mongoose
   })
   .catch(console.error);
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: "684db2fb8d227da99946b951", //  test user
-  };
-  next();
-});
-
 app.use("/", mainRouter);
 
 app.use((err, req, res, _next) => {
