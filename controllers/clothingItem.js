@@ -39,23 +39,34 @@ const getItems = (req, res) => {
 
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
+  // Find the item 1st, check if the current user is the owner, delete it if they are. Otherwise, return a 403 err code.
 
-  ClothingItem.findByIdAndDelete(itemId)
+  ClothingItem.findById(itemId)
     .orFail(() => {
       const error = new Error("Item not found");
       error.statusCode = errors.NOT_FOUND;
       throw error;
     })
-    .then(() => res.status(200).send({ message: "Item deleted" }))
-    .catch((err) => {
-      // Handle invalid ID format
-      if (err.name === "CastError") {
-        return res.status(errors.BAD_REQUEST).send({
-          message: "Invalid item ID format",
-        });
+    .then((item) => {
+      // Check ownership
+      if (item.owner.toString() !== req.user._id) {
+        return res
+          .status(403)
+          .send({ message: "You are not allowed to delete this item" });
       }
 
-      // Handle if item not found
+      // Owner matches — proceed with deletion
+      return item.deleteOne().then(() => {
+        res.status(200).send({ message: "Item deleted" });
+      });
+    })
+    .catch((err) => {
+      if (err.name === "CastError") {
+        return res
+          .status(errors.BAD_REQUEST)
+          .send({ message: "Invalid item ID format" });
+      }
+
       if (err.statusCode === errors.NOT_FOUND) {
         return res.status(errors.NOT_FOUND).send({ message: "Item not found" });
       }
