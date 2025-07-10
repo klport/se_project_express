@@ -35,7 +35,6 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: [true, "Password is required"],
-    minlength: 8,
     select: false, // prevent password from being showed to user
   },
 });

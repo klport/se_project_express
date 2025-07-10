@@ -6,40 +6,23 @@ const {
   BAD_REQUEST,
   INTERNAL_SERVER_ERROR,
   NOT_FOUND,
+  CONFLICT_ERROR,
+  UNAUTHORIZED,
 } = require("../utils/errors");
 const { JWT_SECRET } = require("../utils/config");
-
-// GET
-
-const getUsers = (req, res) => {
-  User.find({})
-    .then((users) => res.send(users))
-    .catch((err) => {
-      console.log(err);
-      res.status(INTERNAL_SERVER_ERROR).send({
-        message: "An error occured while finding the user",
-      });
-    });
-};
 
 // POST /users
 
 const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
-  // need to hash the pw before creating user
+  // hash pw before sending
   bcrypt
     .hash(password, 10)
     .then((hash) => User.create({ name, avatar, email, password: hash }))
-    // i need a 409 conflict error - catch?
     .then((user) => {
-      const userResponse = {
-        _id: user._id,
-        name: user.name,
-        avatar: user.avatar,
-        email: user.email,
-      };
-
-      res.status(201).send(userResponse);
+      const userObj = user.toObject();
+      delete userObj.password; // Remove password before sending
+      return res.status(201).send(userObj);
     })
     .catch((err) => {
       console.error(err);
@@ -47,11 +30,13 @@ const createUser = (req, res) => {
         return res.status(BAD_REQUEST).send({ message: "Invalid data" });
       }
       if (err.code === 11000) {
-        return res.status(409).send({ message: "Email already in use" });
+        return res
+          .status(CONFLICT_ERROR)
+          .send({ message: "Email already in use" });
       }
       return res
         .status(INTERNAL_SERVER_ERROR)
-        .send({ message: "Invalid data" });
+        .send({ message: "An error occurred while creating the user" });
     });
 };
 
@@ -76,7 +61,12 @@ const userLogin = (req, res) => {
     })
     .catch((err) => {
       console.error(err);
-      return res.status(401).send({ message: "Invalid User data" });
+      if (err.message === "Incorrect email or password") {
+        return res.status(UNAUTHORIZED).send({ message: "Invalid User data" });
+      }
+      return res
+        .status(INTERNAL_SERVER_ERROR)
+        .send({ message: "Invalid error" });
     });
 };
 
@@ -134,7 +124,6 @@ const updateUserProfile = (req, res) => {
 };
 
 module.exports = {
-  getUsers,
   createUser,
   getCurrentUser,
   userLogin,

@@ -9,15 +9,11 @@ const {
 } = require("../controllers/clothingItem");
 const auth = require("../middlewares/auth");
 
-// add likeItem, dislikeItem
-
-// starts with /items
+router.get("/", getItems);
 
 router.use(auth);
 
 router.post("/", createItem); // /items/
-
-router.get("/", getItems);
 
 router.put("/:itemId/likes", likeItem);
 

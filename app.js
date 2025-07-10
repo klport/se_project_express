@@ -1,11 +1,14 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const helmet = require("helmet");
 const cors = require("cors");
 const mainRouter = require("./routes/index");
+const { INTERNAL_SERVER_ERROR } = require("./utils/errors");
 
 const app = express();
 const { PORT = 3001 } = process.env;
 
+app.use(helmet());
 app.use(cors());
 app.use(express.json());
 
@@ -20,7 +23,7 @@ app.use("/", mainRouter);
 
 app.use((err, req, res, _next) => {
   console.error("Global error handler caught:", err.message);
-  res.status(500).json({ message: "Internal Server Error" });
+  res.status(INTERNAL_SERVER_ERROR).json({ message: "Internal Server Error" });
 });
 
 app.listen(PORT, () => {
