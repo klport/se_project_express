@@ -1,58 +1,55 @@
 const { default: mongoose } = require("mongoose");
 const ClothingItem = require("../models/clothingItem");
-const errors = require("../utils/errors");
+const {
+  BadRequestError,
+  UnauthorizedError,
+  NotFoundError,
+  ForbiddenError,
+  InsternalServerError,
+} = require("../utils/errors");
 
 // GET /clothingItems
 
-const createItem = (req, res) => {
+const createItem = (req, res, next) => {
   console.log(req);
   console.log(req.body);
 
   const { name, weather, imageUrl } = req.body;
 
+  //creates a new clothing item in MongoDB with ClothingItem.create//
   ClothingItem.create({ name, weather, imageUrl, owner: req.user._id })
     .then((item) => {
       console.log(item);
-      res.send({ data: item });
+      res.status(201).send({ data: item });
     })
     .catch((err) => {
       if (err.name === "ValidationError") {
-        return res.status(errors.BAD_REQUEST).send({ message: "Invalid data" });
+        return next(new BadRequestError("Invalid data provided"));
       }
-      return res.status(errors.INTERNAL_SERVER_ERROR).send({
-        message: "Error from createItem",
-      });
+      return next(err); // Let error handler deal with other errors
     });
 };
 
-const getItems = (req, res) => {
+const getItems = (req, res, next) => {
   ClothingItem.find({})
     .then((items) => res.status(200).send(items))
-    .catch(() => {
-      res
-        .status(errors.INTERNAL_SERVER_ERROR)
-        .send({ message: "Error from getItems" });
+    .catch((err) => {
+      next(err);
     });
 };
 
-// POST
-
-const deleteItem = (req, res) => {
-  const { itemId } = req.params;
+const deleteItem = (req, res, next) => {
   // Find the item 1st, check if the current user is the owner, delete it if they are. Otherwise, return a 403 err code.
+  const { itemId } = req.params;
 
   ClothingItem.findById(itemId)
     .orFail(() => {
-      const error = new Error("Item not found");
-      error.statusCode = errors.NOT_FOUND;
-      throw error;
+      throw new NotFoundError("Item not found");
     })
     .then((item) => {
       // Check ownership
       if (item.owner.toString() !== req.user._id) {
-        return res
-          .status(403)
-          .send({ message: "You are not allowed to delete this item" });
+        throw new ForbiddenError("You are not allowed to delete this item");
       }
 
       // Owner matches — proceed with deletion
@@ -62,63 +59,39 @@ const deleteItem = (req, res) => {
     })
     .catch((err) => {
       if (err.name === "CastError") {
-        return res
-          .status(errors.BAD_REQUEST)
-          .send({ message: "Invalid item ID format" });
+        return next(new BadRequestError("Invalid item ID format"));
       }
-
-      if (err.statusCode === errors.NOT_FOUND) {
-        return res.status(errors.NOT_FOUND).send({ message: "Item not found" });
-      }
-
-      // All other errors
-      console.error("DeleteItem Error:", err);
-      return res
-        .status(errors.INTERNAL_SERVER_ERROR)
-        .send({ message: "Internal Server Error" });
+      return next(err);
     });
 };
 
 // like & dislike items
 
 // LIKE ITEM
-const likeItem = (req, res) => {
+const likeItem = (req, res, next) => {
   const { itemId } = req.params;
   if (!mongoose.isValidObjectId(itemId)) {
-    return res
-      .status(errors.BAD_REQUEST)
-      .send({ message: "Invalid item ID format" });
+    return next(new BadRequestError("Invalid item ID format"));
   }
+
   return ClothingItem.findByIdAndUpdate(
     itemId,
     { $addToSet: { likes: req.user._id } }, // adds _id to the array if it's not there yet
     { new: true }
   )
     .orFail(() => {
-      const error = new Error("Item not found");
-      error.statusCode = errors.NOT_FOUND;
-      throw error;
+      throw new NotFoundError("Item not found");
     })
     .then((item) => res.status(200).send(item))
-    .catch((err) => {
-      if (err.statusCode === errors.NOT_FOUND) {
-        return res.status(errors.NOT_FOUND).send({ message: "Item not found" });
-      }
-
-      return res
-        .status(errors.INTERNAL_SERVER_ERROR)
-        .send({ message: "An error occured while liking the item" });
-    });
+    .catch(next);
 };
 
 // DISLIKE ITEM
 
-const dislikeItem = (req, res) => {
+const dislikeItem = (req, res, next) => {
   const { itemId } = req.params;
   if (!mongoose.isValidObjectId(itemId)) {
-    return res
-      .status(errors.BAD_REQUEST)
-      .send({ message: "Invalid item ID format" });
+    return next(new BadRequestError("Invalid item ID format"));
   }
   return ClothingItem.findByIdAndUpdate(
     itemId,
@@ -126,19 +99,10 @@ const dislikeItem = (req, res) => {
     { new: true }
   )
     .orFail(() => {
-      const error = new Error("Item not found");
-      error.statusCode = errors.NOT_FOUND;
-      throw error;
+      throw new NotFoundError("Item not found");
     })
     .then((item) => res.status(200).send(item))
-    .catch((err) => {
-      if (err.statusCode === errors.NOT_FOUND) {
-        return res.status(errors.NOT_FOUND).send({ message: "Item not found" });
-      }
-      return res
-        .status(errors.INTERNAL_SERVER_ERROR)
-        .send({ message: "An error occurred while disliking the item" });
-    });
+    .catch(next);
 };
 
 module.exports = {

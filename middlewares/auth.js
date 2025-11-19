@@ -4,7 +4,7 @@ const { UNAUTHORIZED } = require("../utils/errors");
 
 const auth = (req, res, next) => {
   // step 1 : get the auth header
-  const { authorization } = req.headers;
+  const { authorization } = req.headers; // headers: {authorization: Bearer 19281892jd192j192j981j28fj12fj198f2j128}
 
   // step 2: check if authorization header exists
   if (!authorization || !authorization.startsWith("Bearer ")) {
@@ -26,5 +26,7 @@ const auth = (req, res, next) => {
   req.user = payload;
   return next();
 };
+
+//const req = {statusCodes: 11, user: {_id: 12j1928j19j9je1}}
 
 module.exports = auth;

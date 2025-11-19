@@ -1,13 +1,18 @@
 const router = require("express").Router();
+const {
+  validateUserBody,
+  validateLogin,
+} = require("../middlewares/validation");
+
 const userRouter = require("./users");
-const itemRouter = require("./clothingitem");
+const itemRouter = require("./clothingItem");
 const { userLogin, createUser } = require("../controllers/users");
 const auth = require("../middlewares/auth");
 const errors = require("../utils/errors");
 
 router.use("/items", itemRouter);
-router.post("/signin", userLogin);
-router.post("/signup", createUser);
+router.post("/signin", validateLogin, userLogin);
+router.post("/signup", validateUserBody, createUser);
 
 const getTest = (req, res) => {
   console.log(req.body);

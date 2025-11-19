@@ -23,7 +23,7 @@ module.exports = {
   },
   rules: {
     // Ignore unused variables if they start with _
-    "no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
+    "no-unused-vars": ["error", { argsIgnorePattern: "^_|next" }],
     "no-underscore-dangle": ["error", { allow: ["_id"] }],
   },
 };

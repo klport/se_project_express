@@ -1,9 +1,18 @@
+const { errors } = require("celebrate");
+const {
+  validateCardBody,
+  validateUserBody,
+  validateLogin,
+  validateId,
+} = require("./middlewares/validation");
 const express = require("express");
 const mongoose = require("mongoose");
 const helmet = require("helmet");
 const cors = require("cors");
 const mainRouter = require("./routes/index");
-const { INTERNAL_SERVER_ERROR } = require("./utils/errors");
+const errorHandler = require("./middlewares/error-handler");
+// const { INTERNAL_SERVER_ERROR } = require("./utils/errors");
+const { requestLogger, errorLogger } = require("./middlewares/logger");
 
 const app = express();
 const { PORT = 3001 } = process.env;
@@ -19,13 +28,16 @@ mongoose
   })
   .catch(console.error);
 
+app.use(requestLogger);
 app.use("/", mainRouter);
 
-app.use((err, req, res, _next) => {
-  console.error("Global error handler caught:", err.message);
-  res.status(INTERNAL_SERVER_ERROR).json({ message: "Internal Server Error" });
-});
+app.use(errorLogger);
+
+app.use(errors()); //celebrate error handler
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+module.exports = app;
