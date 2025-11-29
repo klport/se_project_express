@@ -4,25 +4,33 @@ module.exports = {
     node: true,
   },
 
-  // Add the necessary extensions.
   extends: ["eslint:recommended", "airbnb-base", "prettier"],
+
   overrides: [
     {
+      files: [".eslintrc.{js,cjs}"],
       env: {
         node: true,
       },
-      files: [".eslintrc.{js,cjs}"],
       parserOptions: {
         sourceType: "script",
       },
     },
+    {
+      // 👇 ADD THIS BLOCK
+      files: ["*.test.js", "**/tests/**/*.js"],
+      env: {
+        jest: true,
+      },
+    },
   ],
+
   parserOptions: {
     ecmaVersion: "latest",
     sourceType: "module",
   },
+
   rules: {
-    // Ignore unused variables if they start with _
     "no-unused-vars": ["error", { argsIgnorePattern: "^_|next" }],
     "no-underscore-dangle": ["error", { allow: ["_id"] }],
   },

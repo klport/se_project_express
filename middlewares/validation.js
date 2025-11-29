@@ -42,6 +42,10 @@ module.exports.validateUserBody = celebrate({
     password: Joi.string().required().messages({
       "string.empty": 'The "password" field must be filled in',
     }),
+    weather: Joi.string().valid("hot", "warm", "cold").required().messages({
+      "any.only": 'The "weather" field must be one of: hot, warm, cold',
+      "string.empty": 'The "weather" field must be filled in',
+    }),
   }),
 });
 

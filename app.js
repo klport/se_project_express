@@ -1,4 +1,7 @@
+require("dotenv").config();
+
 const { errors } = require("celebrate");
+const cors = require("cors");
 const {
   validateCardBody,
   validateUserBody,
@@ -8,7 +11,6 @@ const {
 const express = require("express");
 const mongoose = require("mongoose");
 const helmet = require("helmet");
-const cors = require("cors");
 const mainRouter = require("./routes/index");
 const errorHandler = require("./middlewares/error-handler");
 // const { INTERNAL_SERVER_ERROR } = require("./utils/errors");

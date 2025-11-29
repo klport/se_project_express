@@ -46,7 +46,7 @@ class ConflictError extends Error {
   }
 }
 
-class InsternalServerError extends Error {
+class InternalServerError extends Error {
   constructor(message) {
     super(message);
     this.statusCode = 500;
@@ -59,5 +59,5 @@ module.exports = {
   ForbiddenError,
   NotFoundError,
   ConflictError,
-  InsternalServerError,
+  InternalServerError,
 };
