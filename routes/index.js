@@ -5,7 +5,7 @@ const {
 } = require("../middlewares/validation");
 
 const userRouter = require("./users");
-const itemRouter = require("./clothingItem");
+const itemRouter = require("./clothingitem");
 const { userLogin, createUser } = require("../controllers/users");
 const auth = require("../middlewares/auth");
 const errors = require("../utils/errors");
