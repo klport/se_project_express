@@ -2,6 +2,9 @@
 
 What to Wear — Backend API
 
+Frontend code repo : https://github.com/klport/se_project_react
+https://whattowearproject.twilightparadox.com/
+
 - Description of the project and its functionality:
 
 This project is the backend (server) part of What to Wear, an app that helps users like or dislike clothing items. Users can “like” clothes they like and “dislike” clothes they don’t, so later the app can use this info to suggest outfits or keep track of favorites.
