@@ -2,24 +2,18 @@ const { default: mongoose } = require("mongoose");
 const ClothingItem = require("../models/clothingItem");
 const {
   BadRequestError,
-  UnauthorizedError,
   NotFoundError,
   ForbiddenError,
-  InsternalServerError,
 } = require("../utils/errors");
 
 // GET /clothingItems
 
 const createItem = (req, res, next) => {
-  console.log(req);
-  console.log(req.body);
-
   const { name, weather, imageUrl } = req.body;
 
-  //creates a new clothing item in MongoDB with ClothingItem.create//
+  // Creates a new clothing item in MongoDB with ClothingItem.create
   ClothingItem.create({ name, weather, imageUrl, owner: req.user._id })
     .then((item) => {
-      console.log(item);
       res.status(201).send({ data: item });
     })
     .catch((err) => {
@@ -76,7 +70,7 @@ const likeItem = (req, res, next) => {
 
   return ClothingItem.findByIdAndUpdate(
     itemId,
-    { $addToSet: { likes: req.user._id } }, // adds _id to the array if it's not there yet
+    { $addToSet: { likes: req.user._id } }, // Adds _id to the array if it's not there yet
     { new: true }
   )
     .orFail(() => {

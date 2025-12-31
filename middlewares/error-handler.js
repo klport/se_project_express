@@ -1,6 +1,5 @@
 const errorHandler = (err, req, res, next) => {
-  //Express requires 4 parameters for error handling middleware
-  console.error(err);
+  // Express requires 4 parameters for error handling middleware
 
   const { statusCode = 500, message } = err;
 

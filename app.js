@@ -1,19 +1,12 @@
 require("dotenv").config();
 
-const { errors } = require("celebrate");
-const cors = require("cors");
-const {
-  validateCardBody,
-  validateUserBody,
-  validateLogin,
-  validateId,
-} = require("./middlewares/validation");
 const express = require("express");
 const mongoose = require("mongoose");
 const helmet = require("helmet");
+const cors = require("cors");
+const { errors } = require("celebrate");
 const mainRouter = require("./routes/index");
 const errorHandler = require("./middlewares/error-handler");
-// const { INTERNAL_SERVER_ERROR } = require("./utils/errors");
 const { requestLogger, errorLogger } = require("./middlewares/logger");
 
 const app = express();
@@ -28,7 +21,9 @@ mongoose
   .then(() => {
     console.log("Connected to DB");
   })
-  .catch(console.error);
+  .catch(() => {
+    console.error("Error connecting to DB");
+  });
 
 app.use(requestLogger);
 
@@ -42,7 +37,7 @@ app.use("/", mainRouter);
 
 app.use(errorLogger);
 
-app.use(errors()); //celebrate error handler
+app.use(errors()); // celebrate error handler
 app.use(errorHandler);
 
 app.listen(PORT, () => {

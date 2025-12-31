@@ -15,7 +15,6 @@ router.post("/signin", validateLogin, userLogin);
 router.post("/signup", validateUserBody, createUser);
 
 const getTest = (req, res) => {
-  console.log(req.body);
   res.status(200).send(req.body);
 };
 router.post("/test", getTest);

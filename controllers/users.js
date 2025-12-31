@@ -6,8 +6,6 @@ const {
   BadRequestError,
   UnauthorizedError,
   NotFoundError,
-  ForbiddenError,
-  InsternalServerError,
   ConflictError,
 } = require("../utils/errors");
 const { JWT_SECRET } = require("../utils/config");
@@ -15,7 +13,6 @@ const { JWT_SECRET } = require("../utils/config");
 // POST /users
 
 const createUser = (req, res, next) => {
-  console.log("create user testing");
   const { name, avatar, email, password } = req.body;
   // hash pw before sending
   bcrypt
@@ -27,7 +24,6 @@ const createUser = (req, res, next) => {
       return res.status(201).send(userObj);
     })
     .catch((err) => {
-      console.error(err);
       if (err.name === "ValidationError") {
         return next(new BadRequestError("Invalid data provided"));
       }
@@ -47,8 +43,6 @@ const createUser = (req, res, next) => {
 
 const userLogin = (req, res, next) => {
   const { email, password } = req.body;
-  console.log("email", email);
-  console.log("password", password);
   if (!email || !password) {
     return next(new BadRequestError("Invalid data provided"));
   }
@@ -73,7 +67,6 @@ const getCurrentUser = (req, res, next) => {
     .orFail()
     .then((user) => res.status(200).send(user))
     .catch((err) => {
-      console.error(err);
       if (err.name === "ValidationError") {
         return next(new BadRequestError("Invalid data provided"));
       }

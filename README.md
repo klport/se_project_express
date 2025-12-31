@@ -1,9 +1,12 @@
 # WTWR (What to Wear?): Back End
 
-What to Wear — Backend API
+**Deployed Project Domain:** https://whattowearproject.twilightparadox.com/
 
-Frontend code repo : https://github.com/klport/se_project_react
-https://whattowearproject.twilightparadox.com/
+**Frontend GitHub Repository:** https://github.com/klport/se_project_react
+
+**Project Pitch Video:** [Add your video link here] Here, I describe my app and the challenges I face
+-prop drilling
+-event handling
 
 - Description of the project and its functionality:
 
@@ -49,5 +52,3 @@ Error handling: Catches errors and sends back clear messages if something goes w
 `npm run start` — to launch the server
 
 `npm run dev` — to launch the server with the hot reload feature
-
-### Testing
