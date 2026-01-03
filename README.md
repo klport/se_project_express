@@ -4,9 +4,7 @@
 
 **Frontend GitHub Repository:** https://github.com/klport/se_project_react
 
-**Project Pitch Video:** [Add your video link here] Here, I describe my app and the challenges I face
--prop drilling
--event handling
+**Project Pitch Video:** https://www.loom.com/share/b5641483532d47128ccd9aa211d88679
 
 - Description of the project and its functionality:
 
