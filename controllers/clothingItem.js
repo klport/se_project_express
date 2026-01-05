@@ -1,10 +1,9 @@
 const { default: mongoose } = require("mongoose");
 const ClothingItem = require("../models/clothingItem");
-const {
-  BadRequestError,
-  NotFoundError,
-  ForbiddenError,
-} = require("../utils/errors");
+
+const BadRequestError = require("./errors/bad-request-error");
+const ForbiddenError = require("./errors/forbidden-error");
+const NotFoundError = require("./errors/not-found-error");
 
 // GET /clothingItems
 
