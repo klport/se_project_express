@@ -1,5 +1,5 @@
-const JWT_SECRET = "WTW2024_SecretKey_Learning123!";
+const { NODE_ENV, JWT_SECRET } = process.env;
 
 module.exports = {
-  JWT_SECRET,
+  JWT_SECRET: NODE_ENV === "production" ? JWT_SECRET : "dev-secret",
 };

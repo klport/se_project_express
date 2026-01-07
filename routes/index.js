@@ -4,7 +4,7 @@ const {
   validateLogin,
 } = require("../middlewares/validation");
 
-const NotFoundError = require("../controllers/errors/not-found-error");
+const NotFoundError = require("../errors/not-found-error");
 
 const userRouter = require("./users");
 const itemRouter = require("./clothingitem");
